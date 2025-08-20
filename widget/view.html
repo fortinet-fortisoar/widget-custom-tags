@@ -4,24 +4,30 @@
 Copyright end -->
 <div class="widget widget-container chart">
   <div class="display-flex-space-between margin-chart">
-  </div>
+        <h3 data-ng-bind="config.title" class="custom-label-size margin-bottom-0 padding-left-md ng-binding" data-ng-show="::config.title" aria-hidden="false"></h3>
+        <div class="padding-right-0 padding-left-0"  data-ng-hide="!config.collapseWidget"
+            data-ng-class="(page === 'dashboard' || page === 'reporting') ? 'widget-dashboard-actions-width' : 'widget-actions-width'">
+            <span class="fa btn widget-action-icon btn-sm pull-right" data-ng-click="collapsed = !collapsed"
+                data-ng-class="{'fa-caret-up': !collapsed, 'fa-caret-down': collapsed}"></span>
+        </div>
+    </div>
   <div>
-    <div class="padding-left-lg padding-bottom-lg padding-top-lg">
+    <div class="padding-left-lg padding-bottom-lg padding-top-lg margin-bottom-md margin-top-md overflowDiv">
       <div data-ng-if="processing">
         <cs-spinner></cs-spinner>
       </div>
-      <div>
-        <div data-ng-if="config.structureSelected==='URL'" class="display-inline-flex">
-          <div class="align-self-center">
-            <label class="custom-label-size padding-0 ">{{tagsKey}} </label></div>
-          <div data-ng-if="noData" class="font-09em padding-lg padding-top-md">
-              <span data-ng-if="tooltipErrorMsg!==''" data-uib-tooltip-html="tooltipErrorMsg" data-tooltip-placement="top-left">
+      <div data-ng-repeat="item in includedTagsData">
+        <div data-ng-if="item.structureSelected==='URL'" class="padding-top-lg display-inline-flex">
+          <div>
+            <label class="custom-label-size padding-0 ">{{item.tagsKey}}: </label></div>
+          <div data-ng-if="item.noData" class="font-09em padding-left-md">
+              <span data-ng-if="item.tooltipErrorMsg!==''" data-uib-tooltip-html="item.tooltipErrorMsg" data-tooltip-placement="top-left">
                   <i style="color: #E84230;" class="fa fa-exclamation-triangle"></i></span>
               <span class="noInformation">No information available</span>
           </div>
           <div data-ng-if="!noData" class="padding-left-md">
             <ul class="list-unstyled padding-left-sm">
-              <li data-ng-repeat="tags in customTags track by $index">
+              <li data-ng-repeat="tags in item.customTags track by $index">
                 <a class="text-capitalize font-09em" data-ng-if="tags.id" data-ng-click="navigateToOutbreak(tags.id)">
                   <span title="{{ tags.key }}">{{ tags.key }}</span></a>
                 <span class="text-capitalize font-09em active-color" data-ng-if="!tags.id">
@@ -31,21 +37,21 @@ Copyright end -->
             </ul>
           </div>
         </div>
-        <div class="padding-top-lg display-inline-flex" data-ng-if="config.structureSelected==='Tag'">
-          <div class="align-self-center">
-            <label class="custom-label-size padding-0 ">{{tagsKey}} </label></div>
-            <div data-ng-if="noData" class="font-09em padding-lg padding-top-md">
-              <span data-ng-if="tooltipErrorMsg!==''" data-uib-tooltip-html="tooltipErrorMsg" data-tooltip-placement="top-left">
+        <div class="padding-top-lg display-inline-flex" data-ng-if="item.structureSelected==='Tag'">
+          <div>
+            <label class="custom-label-size padding-0 ">{{item.tagsKey}}: </label></div>
+            <div data-ng-if="item.noData" class="font-09em padding-left-md">
+              <span data-ng-if="item.tooltipErrorMsg!==''" data-uib-tooltip-html="item.tooltipErrorMsg" data-tooltip-placement="top-left">
                   <i style="color: #E84230;" class="fa fa-exclamation-triangle"></i></span>
               <span class="noInformation">No information available</span>
           </div>
           <div  data-ng-if="!noData" class="padding-left-md">
-                  <span class="tags-style text-capitalize" data-ng-repeat="tags in customTags track by $index">
+                  <span class="tags-style text-capitalize" data-ng-repeat="tags in item.customTags track by $index">
                     <span title="{{ tags }}">{{ tags }}</span>
           </span>
         </div>
         </div>
-        <div ng-if="structure === 'Card'" class="flex-container"> 
+        <div ng-if="item.structureSelected === 'Card'" class="flex-container"> 
           <div class="flex-item text-capitalize truncate defaultColor font-09em border-radius-10" data-ng-repeat="tags in customTags track by $index"
             data-ng-class="{'card':structure === 'card'}" title="{{ tags.key }}">
             <div class="padding-bottom-sm"><img src={{tags.icon}}></img></div>

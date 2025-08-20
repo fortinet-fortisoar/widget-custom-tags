@@ -6,11 +6,11 @@ Copyright end */
 (function () {
     angular
       .module('cybersponse')
-      .controller('customTags100Ctrl', customTags100Ctrl);
+      .controller('customTags110Ctrl', customTags110Ctrl);
 
-    customTags100Ctrl.$inject = ['$scope', 'widgetUtilityService', '$state', 'appModulesService', 'customTagsService', 'modelMetadatasService', 'localStorageService'];
+    customTags110Ctrl.$inject = ['$scope', 'widgetUtilityService', '$state', 'appModulesService', 'customTagsService', 'modelMetadatasService', 'localStorageService', 'FormEntityService', '$q'];
 
-    function customTags100Ctrl($scope, widgetUtilityService, $state, appModulesService, customTagsService, modelMetadatasService, localStorageService) {  
+    function customTags110Ctrl($scope, widgetUtilityService, $state, appModulesService, customTagsService, modelMetadatasService, localStorageService, FormEntityService, $q) {  
       $scope.noData = false;
       
       $scope.customTags = [];
@@ -19,7 +19,7 @@ Copyright end */
       $scope.pageState = $state;
       $scope.processing = true;
       $scope.tooltipErrorMsg = '';
-
+      $scope.includedTagsData = [{}];
 
       function navigateToOutbreak(_id){
         let module = $scope.config.navigationModule;
@@ -66,51 +66,107 @@ Copyright end */
         let moduleMetaData = modelMetadatasService.getMetadataByModuleType($scope.config.resourceModule);
         let _connectorName = moduleMetaData.dataSource.connector;
         let _connectorAction = moduleMetaData.dataSource.operation;
-        let payload = { 'indicator': $scope.indicator, 'fields': $scope.config.resourceField };
-        customTagsService.executeAction(_connectorName, _connectorAction, payload).then(function(response){
-          $scope.tagsKey = getDisplayKey($scope.config.resourceField);
-          if (response.data[$scope.config.resourceField] && response.data[$scope.config.resourceField].length > 0) {
-            $scope.noData = false;
-            $scope.tooltipErrorMsg = '';
-            if ($scope.config.structureSelected !== 'URL') {
-              $scope.customTags = response.data[$scope.config.resourceField];
-            }
-            else {
-              changeURLTagsSchema(response.data[$scope.config.resourceField]);
-            }
-          }
-          else{
-            $scope.noData = true;
-          }
-        },function(error){
-          $scope.noData = true;
-          $scope.tooltipErrorMsg = 'Error while fetching data. Please check connector logs for more info.';
-        }).finally(function(){
-          $scope.processing = false;
-        });;
+        $scope.loadIncludedTagsData(_connectorName, _connectorAction).then(() => {
+          $scope.includedTagsData.sort((a, b) => a.tagsKey - b.tagsKey);
+        });
       }
+
+
+      $scope.loadIncludedTagsData = function (_connectorName, _connectorAction) {
+        const deferred = $q.defer(); // Create a master deferred
+        const promises = [];
+
+        $scope.processing = true;
+        $scope.includedTagsData = []; // Optionally reset before loading
+
+        $scope.config.includedTagsStructure.forEach(function (element) {
+          const payload = {
+            indicator: $scope.indicator,
+            fields: element.field
+          };
+
+          const promise = customTagsService.executeAction(_connectorName, _connectorAction, payload)
+            .then(function (response) {
+              if (response.data[element.field] && response.data[element.field].length > 0) {
+                const tagData = {
+                  structureSelected: element.structureSelected,
+                  tagsKey : getDisplayKey(element.field),
+                  noData: false,
+                  tooltipErrorMsg : ''
+                };
+
+                if (element.structureSelected !== 'URL') {
+                  const resourceFieldValue = response.data[element.field];
+                  tagData.customTags = Array.isArray(resourceFieldValue)
+                    ? resourceFieldValue
+                    : [resourceFieldValue];
+
+                $scope.includedTagsData.push(tagData);
+                } else {
+                  changeURLTagsSchema(response.data[element.field], element.navigationModule).then((response)=>{
+                    tagData.customTags = response;
+                    $scope.includedTagsData.push(tagData);
+                  });
+                }
+
+              } else {
+                tagData.noData = true;
+              }
+            })
+            .catch(function (error) {
+              $tagData.noData = true;
+              tagData.tooltipErrorMsg = 'Error while fetching data. Please check connector logs for more info.';
+            });
+
+          promises.push(promise);
+        });
+
+        $q.all(promises).finally(function () {
+          $scope.processing = false;
+          deferred.resolve(); // Resolve once all are done
+        });
+
+        return deferred.promise;
+      };
+
   
-      function changeURLTagsSchema(_tagsData) {
-        _tagsData.forEach(tags => {
-          customTagsService.getTagsQuery(tags, $scope.config.navigationModule).then(function (response) {
-            if (response && response.data['hydra:member'] && response.data['hydra:member'].length > 0) {
-              $scope.customTags.push({
-                key: tags,
-                id: response.data['hydra:member'][0].uuid,
-                module: $scope.config.navigationModule
-              })
-            }
-            else { //if API response has no data push only key to display 
-              $scope.customTags.push({
-                key: tags
-              })
-            }
-          }, function (error) {
-            console.log(error);
-          }).finally(function(){
+      function changeURLTagsSchema(_tagsData, navigationModule) {
+        const deferred = $q.defer(); // Create a master deferred
+        if (!Array.isArray(_tagsData)) return;
+
+        $scope.processing = true;
+
+        const tagPromises = _tagsData.map(tag => {
+          return customTagsService.getTagsQuery(tag, navigationModule)
+            .then(response => {
+              const members = response?.data?.['hydra:member'];
+
+              if (members && members.length > 0) {
+                return {
+                  key: tag,
+                  id: members[0].uuid,
+                  module: navigationModule
+                };
+              } else {
+                return { key: tag };
+              }
+            })
+            .catch(error => {
+              console.error(`Error fetching tag "${tag}":`, error);
+              return { key: tag }; // still return something to avoid breaking the flow
+            });
+        });
+
+        // Wait for all tag fetches to complete
+        Promise.all(tagPromises)
+          .then(results => {
+            //$scope.includedTagsData.customTags.push(...results);
+            deferred.resolve(results); 
+          })
+          .finally(() => {
             $scope.processing = false;
           });
-        });
+          return deferred.promise;
       }
 
       function getDisplayKey(_key){

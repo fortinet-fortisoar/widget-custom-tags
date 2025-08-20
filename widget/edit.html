@@ -33,11 +33,16 @@ Copyright end -->
           </select>
           <div data-cs-messages="editTagsWidgetForm.resourceModule"></div>
         </div>
-        <div class="form-group"
+        <div class="form-group dashed-border-section padding-md" data-ng-if="config.resourceModule" data-ng-repeat="item in config.includedTagsStructure">
+          <div class="form-group"
           data-ng-class="{ 'has-error': editTagsWidgetForm.structure.$invalid && editTagsWidgetForm.structure.$touched }">
           <label for="structure" class="control-label">Tags Structure<span class="text-danger">*</span></label>
+          <button type="button" data-ng-click="removeLayer($index)" id="removeLayer-{{ $index }}"
+            class="btn-sm btn btn-link btn-delete-layer" data-ng-if="$index !== 0"> <span
+              class="icon icon-close text-danger"></span>
+          </button>
           <select name="structure" id="structure" class="form-control"
-            data-ng-options="option for option in structureSupported" data-ng-model="config.structureSelected"
+            data-ng-options="option for option in structureSupported" data-ng-model="item.structureSelected"
             required data-ng-change="changeStructure()">
             <option value="">{{'APP.LABEL.SELECT_AN_OPTION' | translate}}</option>
           </select>
@@ -46,12 +51,12 @@ Copyright end -->
         <div class="form-group">
             <label class="control-label" for="resourceField">{{'COMPONENTS.CODE_EDITOR.FIELD' | translate}} <span class="text-danger">*</span></label>
             <select class="form-control" name="resourceField" id="resourceField"
-              data-ng-options="field.name as field.title for field in resourceField" ng-model="config.resourceField" required>
+              data-ng-options="field.name as field.title for field in resourceField" ng-model="item.field" required>
               <option value="">{{'COMPONENTS.FILTER.CONDITIONAL.SELECT_A_FIELD' | translate}}</option>
             </select>
         </div>
         <!-- URL Code Block -->
-        <div class="form-group" data-ng-if="structureSelected==='URL'"
+        <div class="form-group" data-ng-if="item.structureSelected==='URL'"
           data-ng-class="{ 'has-error': editTagsWidgetForm.navigationModule.$invalid && editTagsWidgetForm.navigationModule.$touched }"
           data-ng-if="modules">
           <label for="navigationModule" class="control-label">Navigation Module<span class="text-danger">*</span></label>
@@ -62,6 +67,8 @@ Copyright end -->
           </select>
           <div data-cs-messages="editTagsWidgetForm.navigationModule"></div>
         </div>
+        </div>
+        <button type="button" id="edit-widget-add" data-ng-click="includeMoreTags()" class="btn btn-primary btn-sm margin-top-sm"><i class="icon icon-add margin-right-sm"></i>Include more tags</button>
       </div>
   </div>
   <div class="modal-footer">

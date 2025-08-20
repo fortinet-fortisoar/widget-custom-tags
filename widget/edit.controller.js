@@ -6,17 +6,22 @@ Copyright end */
 (function () {
     angular
         .module('cybersponse')
-        .controller('editCustomTags100Ctrl', editCustomTags100Ctrl);
+        .controller('editCustomTags110Ctrl', editCustomTags110Ctrl);
 
-    editCustomTags100Ctrl.$inject = ['$scope', '$uibModalInstance', 'config', 'widgetUtilityService', '$timeout', 'appModulesService', 'Entity'];
+    editCustomTags110Ctrl.$inject = ['$scope', '$uibModalInstance', 'config', 'widgetUtilityService', '$timeout', 'appModulesService', 'Entity'];
 
-    function editCustomTags100Ctrl($scope, $uibModalInstance, config, widgetUtilityService, $timeout, appModulesService, Entity) {
+    function editCustomTags110Ctrl($scope, $uibModalInstance, config, widgetUtilityService, $timeout, appModulesService, Entity) {
         $scope.cancel = cancel;
         $scope.save = save;
+        $scope.includeMoreTags = includeMoreTags;
+        $scope.removeLayer = removeLayer;
         $scope.config = config;
         $scope.isConfigurable = false;
         $scope.structureSupported = ['Card','Tag','URL'];
-
+        $scope.config.includedTagsStructure = [{
+              structureSelected: '',
+              field: ''
+          }];
         function _handleTranslations() {
           let widgetNameVersion = widgetUtilityService.getWidgetNameVersion($scope.$resolve.widget, $scope.$resolve.widgetBasePath);
           
@@ -74,6 +79,20 @@ Copyright end */
             $scope.fieldsArray = entity.getFormFieldsArray();
           });
         };
+
+        function includeMoreTags (){
+          $scope.config.includedTagsStructure.push({
+              structureSelected: '',
+              field: ''
+          });
+        }
+
+        //remove layer
+        function removeLayer(index) {
+          if (index !== 0) {
+            $scope.config.includedTagsStructure.splice(index);
+          }
+        }
 
         function init() {
             // To handle backward compatibility for widget

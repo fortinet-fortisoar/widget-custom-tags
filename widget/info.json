@@ -2,8 +2,8 @@
     "name": "customTags",
     "title": "Custom Tags",
     "subTitle": "customTags",
-    "version": "1.0.0",
-    "published_date": 1742561104,
+    "version": "1.1.0",
+    "published_date": 1755533048,
     "releaseNotes": "unavailable",
     "metadata": {
         "description": "Custom tags widget shows tag data in form of tag block, url or cards.",
@@ -19,7 +19,7 @@
         "category": [
             "Threat Intelligence"
         ],
-        "help_online": "https://github.com/fortinet-fortisoar/solution-pack-fortiguard-labs-ioc-search/tree/release/1.0.0/README.md"
+        "help_online": "https://github.com/fortinet-fortisoar/solution-pack-fortiguard-labs-ioc-search/tree/release/1.1.0/README.md"
     },
     "development": false
 }
