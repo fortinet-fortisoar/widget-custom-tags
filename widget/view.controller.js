@@ -21,8 +21,8 @@ Copyright end */
       $scope.tooltipErrorMsg = '';
       $scope.includedTagsData = [{}];
 
-      function navigateToOutbreak(_id){
-        let module = $scope.config.navigationModule;
+      function navigateToOutbreak(_id, _navigationModule){
+        let module = _navigationModule;
         var viewParams = {
           indicator: _id
         };
