@@ -16,7 +16,7 @@ Copyright end -->
       <div data-ng-if="processing">
         <cs-spinner></cs-spinner>
       </div>
-      <div data-ng-repeat="item in includedTagsData | orderBy:'tagsKey'">
+      <div data-ng-repeat="item in includedTagsData | orderBy:sortTags">
         <div data-ng-if="item.structureSelected==='URL'" class="padding-top-lg display-inline-flex">
           <div>
             <label class="custom-label-size padding-0 ">{{item.tagsKey}}: </label></div>
