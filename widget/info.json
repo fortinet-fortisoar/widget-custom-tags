@@ -19,7 +19,7 @@
         "category": [
             "Threat Intelligence"
         ],
-        "help_online": "https://github.com/fortinet-fortisoar/solution-pack-fortiguard-labs-ioc-search/tree/release/1.1.0/README.md"
+        "help_online": "https://github.com/fortinet-fortisoar/solution-pack-threat-intel-management/blob/release/3.0.0/README.md"
     },
     "development": false
 }
